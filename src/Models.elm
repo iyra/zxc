@@ -1,6 +1,6 @@
 module Models exposing (..)
-import List exposing (head, map, filter, indexedMap)
-import Tuple exposing (first)
+import List exposing (head, map, filter, indexedMap, tail, isEmpty)
+import Tuple exposing (first, second)
 {-| Take a predicate and a list, return the index of the first element that satisfies the predicate. Otherwise, return `Nothing`. Indexing starts from 0.
     findIndex isEven [1,2,3] == Just 1
     findIndex isEven [1,3,5] == Nothing
@@ -92,21 +92,33 @@ toItems x = case x of
 removeFromList i xs =
   (List.take i xs) ++ (List.drop (i+1) xs)
 
+findItem : Maybe (List Item) -> String -> Int -> Maybe (Int, Item)
+findItem inv str i =
+    case inv of
+        Nothing -> Nothing
+        Just li ->
+            case (head li) of
+                Nothing -> Nothing
+                Just headItem -> if headItem.name == str then
+                                     Just (i, headItem)
+                                 else
+                                     findItem (tail li) str (i+1)
+                                     
 useItem : Player -> String -> Result String Player
-useItem p i =
-    case find (\it -> it.name == i) (toItems p.inventory) of
-        Nothing -> Err "That isn't in the backpack"
-        Just itemToUse -> let
-            playerAppliedItem = itemToUse.action p
-       in
-           case elemIndex itemToUse (toItems p.inventory) of
+useItem p str =
+    case (findItem (Just (toItems p.inventory)) str 0) of
                Nothing -> Err "That isn't in the backpack"
-               Just u -> Ok (Player playerAppliedItem.name
-                                 playerAppliedItem.scene
-                                 playerAppliedItem.health
-                                 (Inventory (removeFromList u (toItems playerAppliedItem.inventory)))
-                                 playerAppliedItem.history)
-            
+               Just rt -> let
+                   itemIndex = first rt
+                   item = second rt
+                   playerAppliedItem = item.action p
+              in
+                  Ok (Player playerAppliedItem.name
+                          playerAppliedItem.scene
+                          playerAppliedItem.health
+                          (Inventory (removeFromList itemIndex (toItems playerAppliedItem.inventory)))
+                          playerAppliedItem.history)
+
 new : Player
 new =
     { name = "Unnamed"
