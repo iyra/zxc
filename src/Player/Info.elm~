@@ -1,0 +1,41 @@
+module Player.Info exposing (..)
+
+import Html exposing (..)
+import Html.Attributes exposing (class)
+import Msgs exposing (Msg)
+import Models exposing (Player)
+
+view : Player -> Html Msg
+view player =
+    div []
+        [ nav
+        , list player
+        ]
+
+
+nav : Html Msg
+nav =
+    div [ class "clearfix mb2 white bg-black" ]
+        [ div [ class "left p2" ] [ text "Info" ] ]
+
+
+list : Player -> Html Msg
+list player =
+    div [ class "p2" ]
+        [ table [] [
+               [ tr []
+                    [ th [] [ text "Name" ]
+                    , th [] [ text "Current scene" ]
+                    , th [] [ text "Health" ]
+                    ]
+              ]
+              , [tr [] 
+                     [ td [] [ text player.name ] ]
+                , [ td [] [ text player.scene ] ]
+                , [ td [] [ text String.toInt(player.health) ] ]    
+                ]
+              ]
+        ]
+        
+              
+              

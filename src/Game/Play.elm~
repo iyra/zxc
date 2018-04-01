@@ -1,0 +1,18 @@
+module Game.Play exposing (..)
+
+import Html exposing (..)
+import Html.Attributes exposing (class, title)
+import Msgs exposing (Msg)
+import Models exposing (Game, Player, Inventory, Item, toItems)
+
+view : Game -> Player -> Html Msg
+view game player =
+       div []
+           [ nav
+           , messageBox game
+           ]
+messageBox : Game -> Html Msg
+view game =
+    div []
+        [ text "hi" ]
+               

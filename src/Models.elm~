@@ -1,0 +1,27 @@
+module Models exposing (..)
+
+
+type alias Model =
+    { player : Player
+    }
+
+
+initialModel : Model
+initialModel =
+    { player = Player "Iyra" "one" 83
+    }
+
+
+type alias Player =
+    { name : String
+    , scene : String
+    , health : Int
+    }
+
+
+new : Player
+new =
+    { name = "Unnamed"
+    , scene = "one"
+    , health = 83
+    }
