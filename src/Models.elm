@@ -82,6 +82,7 @@ type alias Player =
 type alias Game =
     { scenes : List Scene
     , player : Player
+    , status : String
     }
 type Inventory = Inventory (List Item)
 
@@ -133,6 +134,9 @@ type Route
     | GameRoute
     | NotFoundRoute
 
+modHealth : Player -> Int -> Player
+modHealth p by =
+    Player p.name p.scene (p.health + by) p.inventory p.history
 
 initialModel : Route -> Model
 initialModel route =
@@ -149,7 +153,13 @@ initialModel route =
     in
         {
             player = player
-        , game = { scenes = []
-                 , player = player }
+        , game = { scenes = [Scene "one" "Beginning" "Welcome to the game."
+                                 [Choice "towub" "Go to the next thing" (\p -> modHealth p 10) "two"]
+                                 False (\p -> p.health > 50),
+                            Scene "two" "Next thing" "wub"
+                                []
+                                False (\p -> p.health > 80)]
+                 , player = player
+                 , status = ""}
         , route = route
         }

@@ -15,7 +15,7 @@ page : Model -> Html Msg
 page model =
     case model.route of
         Models.GameRoute ->
-            Game.Play.view model.game model.player
+            Game.Play.view model.game
         Models.PlayerRoute ->
             Player.Info.view model.player
 
