@@ -191,7 +191,7 @@ initialModel route =
     let
         player = { name = "Iyra"
                , scene = "one"
-               , health = 83 
+               , health = 15
                , inventory = Inventory [Item "bp"
                                             (\p -> (Player p.name p.scene (p.health+10) p.inventory p.history))
                                             "Base potion; add 10 to your health."

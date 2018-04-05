@@ -1,7 +1,75 @@
-$font-stack:    Helvetica, sans-serif;
-$primary-color: #333;
+@import url('https://fonts.googleapis.com/css?family=PT+Mono');
 
+$font-stack:  'PT Mono',  monospace;
+$primary-color: #eee;
+$neon: #100133;
+$neonborder: lighten(#29004D, 47%);
 body {
   font: 100% $font-stack;
   color: $primary-color;
+  background-color: #0C0321;
+  font-size: 84%;
+  max-width:50em;
+  margin: 0 auto;
+  padding: 0;
+}
+
+table {
+    width:100%;
+    margin-top:1em;
+    margin-bottom:1em;
+}
+
+table, th, tr, td {
+    border: 1px solid $neonborder;
+}
+
+.pickups, .player, .choices, .scene {
+    background-color: $neon;
+    padding:1em;
+    border: 1px solid $neonborder;
+    margin:1em;
+}
+
+.pickups > span, label, .player > span, .choices > span, .scene > span {
+    color: $neonborder;
+}
+
+label {
+    margin-right:1em;
+}
+
+.pickups > ul, .player > ul, .choices > ul {
+    margin:0;
+    padding:0;
+    margin-left:1em;
+}
+
+.player > ul > li, .choices > ul > li {
+    list-style-type:none;
+}
+
+.pickups > ul > li {
+    display: inline;
+    list-style-type: none;
+}
+
+.low-health {
+    background-color: #FF0000;
+}
+.medium-health {
+    background-color: #FF8040;
+    color:black;
+}
+.good-health {
+    background-color:  #FFFF00;
+    color:black;
+}
+.excellent-health {
+    background-color: #85FF85;
+    color:black;
+}
+.health {
+    padding-left:0.5em;
+    padding-right:0.5em;
 }
