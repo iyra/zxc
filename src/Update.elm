@@ -1,13 +1,14 @@
 module Update exposing (..)
 
-import Models exposing (Model, Player, Game, Scene, useItem)
+import Models exposing (Model, Player, Game, Scene, useItem, transferItem, modName, sceneSets, new)
 import Msgs exposing (Msg)
 import Routing exposing (parseLocation)
 import List exposing (append, tail, head)
+import Dict exposing (get)
 
 playerNextScene : Player -> String -> Player
 playerNextScene p nextSceneString =
-    Player p.name nextSceneString p.health p.inventory (append p.history [nextSceneString])
+    {p | scene = nextSceneString, history = (append p.history [nextSceneString])}
 
 findScene : Maybe (List Scene) -> String -> Maybe Scene
 findScene sceneList str =
@@ -35,13 +36,29 @@ update msg model =
                 theScene = findScene (Just game.scenes) choice.goTo
             in
                 case theScene of
-                    Nothing -> ( {model | game = Game game.scenes game.player "Couldn't find the scene you were looking for..." }, Cmd.none )
+                    Nothing -> ( {model | game = {game | status = "Couldn't find the scene you were looking for. Contact the owner about this." } }, Cmd.none )
                     Just scene ->
                         if (scene.checker game.player) then
-                            ( { model | game = Game game.scenes (playerNextScene (choice.action game.player) choice.goTo) "Scene changed" }, Cmd.none )
+                            ( { model | game = {game | player = (playerNextScene (choice.action game.player) choice.goTo),
+                                                       status = "Scene changed" } }, Cmd.none )
                         else
-                            ( { model | game = Game game.scenes game.player "You can't go there." }, Cmd.none )
+                            ( { model | game = {game | status = "You can't go there."} }, Cmd.none )
         Msgs.UseItem game item ->
             case (useItem game.player item.name) of
                 Err e -> ( { model | game = Game game.scenes game.player e }, Cmd.none)
-                Ok p -> ( { model | game = Game game.scenes p "Item applied" }, Cmd.none)
+                Ok p -> ( { model | game = {game | player = p, status = "Item used"} }, Cmd.none)
+        Msgs.TransferItem game item ->
+            case (transferItem game item.name) of
+                Err e -> ( { model | game = Game game.scenes game.player e }, Cmd.none)
+                Ok p -> ( { model | game = p }, Cmd.none)
+        Msgs.ChangeSceneSet game str ->
+            case (Dict.get str sceneSets) of
+                -- if the scene set is being changed, it makes sense to reset the player too
+                -- but with the same name
+                Nothing -> ( {model | game = {game | status = "That scene doesn't exist" }}, Cmd.none )
+                Just value -> ({model | game = {game |
+                                                scenes = value,
+                                                player = { new | name = game.player.name },
+                                                status = "Scene loaded."}}, Cmd.none)
+        Msgs.ChangeName game str ->
+            ({model | game = {game | player = (modName game.player str), status = "Name set."}}, Cmd.none)

@@ -8,7 +8,8 @@ import UrlParser exposing (..)
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ map GameRoute top
+        [ map WelcomeRoute top
+        , map GameRoute (s "play")
         , map PlayerRoute (s "player")
         ]
 
@@ -21,3 +22,6 @@ parseLocation location =
 
         Nothing ->
             NotFoundRoute
+
+playPath : String
+playPath = "#play"

@@ -1,4 +1,5 @@
 var path = require("path");
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -18,7 +19,8 @@ module.exports = {
         test: /\.(css|scss)$/,
         use: [
           'style-loader',
-          'css-loader',
+            'css-loader',
+	    'sass-loader'
         ]
       },
       {
@@ -37,14 +39,16 @@ module.exports = {
 'url-loader?limit=10000&mimetype=application/font-woff',
       },
       {
-        test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        test: /\.(ttf|eot|svg|png|gif|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'file-loader',
-      },
+      }
     ],
 
     noParse: /\.elm$/,
   },
-
+    plugins: [
+	new CopyWebpackPlugin([{from:'src/img', to:'img'}])
+    ],
   devServer: {
     inline: true,
     stats: { colors: true },

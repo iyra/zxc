@@ -1,6 +1,7 @@
 module Models exposing (..)
 import List exposing (head, map, filter, indexedMap, tail, isEmpty)
 import Tuple exposing (first, second)
+import Dict exposing (fromList)
 {-| Take a predicate and a list, return the index of the first element that satisfies the predicate. Otherwise, return `Nothing`. Indexing starts from 0.
     findIndex isEven [1,2,3] == Just 1
     findIndex isEven [1,3,5] == Nothing
@@ -63,6 +64,7 @@ type alias Scene =
     , choices : List Choice
     , isEnd : Bool
     , checker : Player -> Bool
+    , pickups : List Item
     }
 
 type alias Item =
@@ -86,6 +88,15 @@ type alias Game =
     }
 type Inventory = Inventory (List Item)
 
+sceneSets = Dict.fromList [
+ ("zxc", [Scene "one" "Beginning" "Welcome to the game."
+          [Choice "towub" "Go to the next thing" (\p -> modHealth p 10) "two"]
+          False (\p -> p.health > 50) [],
+      
+          Scene "two" "Next thing" "wub"
+          []
+          False (\p -> p.health > 80) []])]
+
 toItems : Inventory -> List Item
 toItems x = case x of
                 Inventory l -> l
@@ -104,7 +115,39 @@ findItem inv str i =
                                      Just (i, headItem)
                                  else
                                      findItem (tail li) str (i+1)
-                                     
+
+findScene : Maybe (List Scene) -> String -> Int -> Maybe (Int, Scene)
+findScene scs str i =
+    case scs of
+        Nothing -> Nothing
+        Just li ->
+            case (head li) of
+                Nothing -> Nothing
+                Just headItem -> if headItem.id == str then
+                                     Just (i, headItem)
+                                 else
+                                     findScene (tail li) str (i+1)
+
+transferItem : Game -> String -> Result String Game
+transferItem game itemString =
+    case (findScene (Just game.scenes) game.player.scene 0) of
+        Nothing -> Err "That scene doesn't exist"
+        Just sc -> let
+            sceneIndex = first sc
+            scene = second sc
+       in
+           case (findItem (Just scene.pickups) itemString 0) of
+               Nothing -> Err "That item isn't in the scene"
+               Just rt -> let
+                   itemIndex = first rt
+                   item = second rt
+                   newScenes = { scene | pickups = (removeFromList itemIndex scene.pickups) } :: (removeFromList sceneIndex game.scenes)
+                   p = game.player
+              in
+                  Ok (Game newScenes { p | inventory = (Inventory (item :: (toItems p.inventory)))} game.status)
+                  --Ok { game | player = { p | inventory = (Inventory (item :: (toItems p.inventory)))},
+                  --            scenes = newScenes }
+                                      
 useItem : Player -> String -> Result String Player
 useItem p str =
     case (findItem (Just (toItems p.inventory)) str 0) of
@@ -131,12 +174,17 @@ new =
 
 type Route
     = PlayerRoute
+    | WelcomeRoute
     | GameRoute
     | NotFoundRoute
 
 modHealth : Player -> Int -> Player
 modHealth p by =
     Player p.name p.scene (p.health + by) p.inventory p.history
+
+modName : Player -> String -> Player
+modName p newname =
+    Player newname p.scene p.health p.inventory p.history
 
 initialModel : Route -> Model
 initialModel route =
@@ -155,10 +203,13 @@ initialModel route =
             player = player
         , game = { scenes = [Scene "one" "Beginning" "Welcome to the game."
                                  [Choice "towub" "Go to the next thing" (\p -> modHealth p 10) "two"]
-                                 False (\p -> p.health > 50),
+                                 False (\p -> p.health > 50) [Item "bp"
+                                            (\p -> (Player p.name p.scene (p.health+10) p.inventory p.history))
+                                            "Base potion; add 10 to your health."
+                                       ],
                             Scene "two" "Next thing" "wub"
                                 []
-                                False (\p -> p.health > 80)]
+                                False (\p -> p.health > 80) []]
                  , player = player
                  , status = ""}
         , route = route
